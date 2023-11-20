@@ -1,0 +1,11 @@
+create f2
+append f2 12345678901234567890
+slice f2 3 8
+cat f2
+mirror f2
+slice f2 10 15
+mirror f2
+cat f2
+slice f2 0 10
+cat f2
+exit

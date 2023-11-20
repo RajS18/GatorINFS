@@ -1,0 +1,72 @@
+## Testing your assignment before submission ##
+
+# Overview
+
+To help you assess your progress and save time grading, you will test your assignments on your own before submitting.
+
+To streamline this process, we have created a Docker container-based virtualized test environment that you can download and run on your own computer. At a high level, the test environment works as follows:
+
+- You place your Python files in a test directory on your computer
+- You then run a Docker container, which imports your files, runs a series of tests, and provides you a summary of results
+
+# Pre-requisite: Docker
+
+Docker is an example of applying virtualization (a topic we'll cover in class) to simplify software packaging and deployment. Docker is widely used in practice, and if you haven't used it before, it's another skill you'll gain in this class that will be useful if you're interested in a career in systems.
+
+Docker consists of an execution "engine" (which runs on your computer), and one or more "images" (which you download from a repository called DockerHub). The image encapsulates all the software you may need for a particular purpose - in this class, the software includes Linux, Python, and various testing scripts. The engine is able to execute the software in this image - regardless of whether your computer runs, say, Windows, MacOS, or Linux.
+
+While Docker often runs on servers on the Internet, you will download and run Docker Desktop on your own computer. To install Docker Desktop, follow the instructions here:
+
+https://docs.docker.com/desktop/
+
+# Running tests
+
+Once you have Docker installed on your computer, running a test is a single command that you can run in a terminal - the command below assumes you are in the current working directory where your Python files are. The argument at the end is the homework number to test, e.g. to test homework #2:
+
+docker run -it --rm --name pocsd --mount type=bind,source="$(pwd)",target=/tmp rjofig/pocsdgrading 2
+
+Once the Docker container finishes running the tests, it creates a file diffs_hw2.txt (for HW#2) that shows a text "diff" between your output and the expected correct output. What you want to see is something like the output below; if your code has errors, you'll need to debug the errors on your own environment, but the diff can provide you clues for what's going wrong.
+
+Sample diff file for a correct assignment:
+
+##########################################
+hw2_2023_test1.out
+##########################################
+##########################################
+hw2_2023_test2.out
+##########################################
+##########################################
+hw2_2023_test3.out
+##########################################
+##########################################
+hw2_2023_test4.out
+##########################################
+##########################################
+hw2_2023_test5.out
+##########################################
+##########################################
+hw2_2023_test6.out
+##########################################
+##########################################
+hw2_2023_test7.out
+##########################################
+
+Snippet of a diff output when errors occur; the lines with "<" are for what your code produced, lines with ">" are for the correct results
+
+##########################################
+hw3_2023_test2.out
+##########################################
+31,34c31,33
+< Error: not found
+< [cwd=3]%
+< Error: not found
+< [cwd=3]%
+---
+> [cwd=0]%
+> THIS_IS_F1
+> [cwd=0]%
+##########################################
+hw3_2023_test3.out
+##########################################
+
+

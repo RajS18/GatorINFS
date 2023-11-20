@@ -1,0 +1,8 @@
+create f1
+append f1 MYTEST
+cat f1
+mirror f1
+cat f1
+mirror f1
+cat f1
+exit
