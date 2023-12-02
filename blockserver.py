@@ -36,7 +36,7 @@ if __name__ == "__main__":
   ap.add_argument('-bs', '--block_size', type=int, help='an integer value')
   ap.add_argument('-port', '--port', type=int, help='an integer value')
   ap.add_argument('-delayat', '--delayat', type=int, help='an integer value')
-
+  ap.add_argument('-cblk', '--corrupt_block', type=int, help='must be a valid integer')
   args = ap.parse_args()
 
   if args.total_num_blocks:
@@ -45,6 +45,9 @@ if __name__ == "__main__":
     print('Must specify total number of blocks')
     quit()
 
+  if args.corrupt_block and (args.corrupt_block < 0 or args.corrupt_block >= TOTAL_NUM_BLOCKS):
+    print('corrupt block must be in a valid block number range')
+  
   if args.block_size:
     BLOCK_SIZE = args.block_size
   else:

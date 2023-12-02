@@ -10,8 +10,7 @@ from absolutepath import *
 
 ## This class implements an interactive shell to navigate the file system
 
-
-class FSShell:
+class FSShell():
     def __init__(self, RawBlocks, FileOperationsObject, AbsolutePathObject):
         # cwd stored the inode of the current working directory
         # we start in the root directory
@@ -31,17 +30,11 @@ class FSShell:
         try:
             i = int(i)
         except ValueError:
-            print("Error: " + i + " not a valid Integer")
+            print('Error: ' + i + ' not a valid Integer')
             return -1
 
         if i < 0 or i >= fsconfig.MAX_NUM_INODES:
-            print(
-                "Error: inode number "
-                + str(i)
-                + " not in valid range [0, "
-                + str(fsconfig.MAX_NUM_INODES - 1)
-                + "]"
-            )
+            print('Error: inode number ' + str(i) + ' not in valid range [0, ' + str(fsconfig.MAX_NUM_INODES - 1) + ']')
             return -1
         inobj = InodeNumber(i)
         inobj.InodeNumberToInode(self.RawBlocks)
@@ -68,29 +61,14 @@ class FSShell:
         try:
             n = int(n)
         except ValueError:
-            print("Error: " + n + " not a valid Integer")
+            print('Error: ' + n + ' not a valid Integer')
             return -1
         if n < 0 or n >= fsconfig.TOTAL_NUM_BLOCKS:
-            print(
-                "Error: block number "
-                + str(n)
-                + " not in valid range [0, "
-                + str(fsconfig.TOTAL_NUM_BLOCKS - 1)
-                + "]"
-            )
+            print('Error: block number ' + str(n) + ' not in valid range [0, ' + str(fsconfig.TOTAL_NUM_BLOCKS - 1) + ']')
             return -1
-        print(
-            "Block (showing any string snippets in block the block) ["
-            + str(n)
-            + "] : \n"
-            + str((self.RawBlocks.Get(n).decode(encoding="UTF-8", errors="ignore")))
-        )
-        print(
-            "Block (showing raw hex data in block) ["
-            + str(n)
-            + "] : \n"
-            + str((self.RawBlocks.Get(n).hex()))
-        )
+        print('Block (showing any string snippets in block the block) [' + str(n) + '] : \n' + str(
+            (self.RawBlocks.Get(n).decode(encoding='UTF-8', errors='ignore'))))
+        print('Block (showing raw hex data in block) [' + str(n) + '] : \n' + str((self.RawBlocks.Get(n).hex())))
         return 0
 
     # implements showblockslice (log slice of block n contents)
@@ -98,60 +76,36 @@ class FSShell:
         try:
             n = int(n)
         except ValueError:
-            print("Error: " + n + " not a valid Integer")
+            print('Error: ' + n + ' not a valid Integer')
             return -1
         try:
             start = int(start)
         except ValueError:
-            print("Error: " + start + " not a valid Integer")
+            print('Error: ' + start + ' not a valid Integer')
             return -1
         try:
             end = int(end)
         except ValueError:
-            print("Error: " + end + " not a valid Integer")
+            print('Error: ' + end + ' not a valid Integer')
             return -1
 
         if n < 0 or n >= fsconfig.TOTAL_NUM_BLOCKS:
-            print(
-                "Error: block number "
-                + str(n)
-                + " not in valid range [0, "
-                + str(fsconfig.TOTAL_NUM_BLOCKS - 1)
-                + "]"
-            )
+            print('Error: block number ' + str(n) + ' not in valid range [0, ' + str(fsconfig.TOTAL_NUM_BLOCKS - 1) + ']')
             return -1
         if start < 0 or start >= fsconfig.BLOCK_SIZE:
-            print(
-                "Error: start "
-                + str(start)
-                + "not in valid range [0, "
-                + str(fsconfig.BLOCK_SIZE - 1)
-                + "]"
-            )
+            print('Error: start ' + str(start) + 'not in valid range [0, ' + str(fsconfig.BLOCK_SIZE - 1) + ']')
             return -1
         if end < 0 or end >= fsconfig.BLOCK_SIZE or end <= start:
-            print(
-                "Error: end "
-                + str(end)
-                + "not in valid range [0, "
-                + str(fsconfig.BLOCK_SIZE - 1)
-                + "]"
-            )
+            print('Error: end ' + str(end) + 'not in valid range [0, ' + str(fsconfig.BLOCK_SIZE - 1) + ']')
             return -1
 
         wholeblock = self.RawBlocks.Get(n)
-        print(
-            "Block (raw hex block) ["
-            + str(n)
-            + "] : \n"
-            + str((wholeblock[start : end + 1].hex()))
-        )
+        print('Block (raw hex block) [' + str(n) + '] : \n' + str((wholeblock[start:end + 1].hex())))
         return 0
 
     # file operations
     # implements cd (change directory)
     def cd(self, dir):
-        self.RawBlocks.Acquire()
         i = self.AbsolutePathObject.PathNameToInodeNumber(dir, self.cwd)
         if i == -1:
             print("Error: not found\n")
@@ -162,11 +116,9 @@ class FSShell:
             print("Error: not a directory\n")
             return -1
         self.cwd = i
-        self.RawBlocks.Release()
 
     # implements ls (lists files in directory)
     def ls(self):
-        self.RawBlocks.Acquire()
         inobj = InodeNumber(self.cwd)
         inobj.InodeNumberToInode(self.RawBlocks)
         block_index = 0
@@ -178,46 +130,27 @@ class FSShell:
                 end_position = fsconfig.BLOCK_SIZE
             current_position = 0
             while current_position < end_position:
-                entryname = block[
-                    current_position : current_position + fsconfig.MAX_FILENAME
-                ]
-                entryinode = block[
-                    current_position
-                    + fsconfig.MAX_FILENAME : current_position
-                    + fsconfig.FILE_NAME_DIRENTRY_SIZE
-                ]
-                entryinodenumber = int.from_bytes(entryinode, byteorder="big")
+                entryname = block[current_position:current_position + fsconfig.MAX_FILENAME]
+                entryinode = block[current_position + fsconfig.MAX_FILENAME:current_position + fsconfig.FILE_NAME_DIRENTRY_SIZE]
+                entryinodenumber = int.from_bytes(entryinode, byteorder='big')
                 inobj2 = InodeNumber(entryinodenumber)
                 inobj2.InodeNumberToInode(self.RawBlocks)
                 if inobj2.inode.type == fsconfig.INODE_TYPE_DIR:
-                    print(
-                        "[" + str(inobj2.inode.refcnt) + "]:" + entryname.decode() + "/"
-                    )
+                    print("[" + str(inobj2.inode.refcnt) + "]:" + entryname.decode().strip() + "/")
                 else:
                     if inobj2.inode.type == fsconfig.INODE_TYPE_SYM:
                         target_block_number = inobj2.inode.block_numbers[0]
                         target_block = self.RawBlocks.Get(target_block_number)
-                        target_slice = target_block[0 : inobj2.inode.size]
-                        print(
-                            "["
-                            + str(inobj2.inode.refcnt)
-                            + "]:"
-                            + entryname.decode()
-                            + "@ -> "
-                            + target_slice.decode()
-                        )
+                        target_slice = target_block[0:inobj2.inode.size]
+                        print("[" + str(inobj2.inode.refcnt) + "]:" + entryname.decode() + "@ -> " + target_slice.decode())
                     else:
-                        print(
-                            "[" + str(inobj2.inode.refcnt) + "]:" + entryname.decode()
-                        )
+                        print("[" + str(inobj2.inode.refcnt) + "]:" + entryname.decode())
                 current_position += fsconfig.FILE_NAME_DIRENTRY_SIZE
             block_index += 1
-        self.RawBlocks.Release()
         return 0
 
     # implements cat (print file contents)
     def cat(self, filename):
-        self.RawBlocks.Acquire()
         i = self.AbsolutePathObject.PathNameToInodeNumber(filename, self.cwd)
         if i == -1:
             print("Error: not found\n")
@@ -232,36 +165,26 @@ class FSShell:
             print("Error: " + errorcode)
             return -1
         print(data.decode())
-        self.RawBlocks.Release()
         return 0
 
     # implements mkdir
     def mkdir(self, dir):
-        self.RawBlocks.Acquire()
-        i, errorcode = self.FileOperationsObject.Create(
-            self.cwd, dir, fsconfig.INODE_TYPE_DIR
-        )
+        i, errorcode = self.FileOperationsObject.Create(self.cwd, dir, fsconfig.INODE_TYPE_DIR)
         if i == -1:
             print("Error: " + errorcode + "\n")
             return -1
-        self.RawBlocks.Release()
         return 0
 
     # implements create
     def create(self, file):
-        self.RawBlocks.Acquire()
-        i, errorcode = self.FileOperationsObject.Create(
-            self.cwd, file, fsconfig.INODE_TYPE_FILE
-        )
+        i, errorcode = self.FileOperationsObject.Create(self.cwd, file, fsconfig.INODE_TYPE_FILE)
         if i == -1:
             print("Error: " + errorcode + "\n")
             return -1
-        self.RawBlocks.Release()
         return 0
 
     # implements append
     def append(self, filename, string):
-        self.RawBlocks.Acquire()
         i = self.AbsolutePathObject.PathNameToInodeNumber(filename, self.cwd)
         if i == -1:
             print("Error: not found\n")
@@ -271,28 +194,24 @@ class FSShell:
         if inobj.inode.type != fsconfig.INODE_TYPE_FILE:
             print("Error: not a file\n")
             return -1
-        written, errorcode = self.FileOperationsObject.Write(
-            i, inobj.inode.size, bytearray(string, "utf-8")
-        )
+        written, errorcode = self.FileOperationsObject.Write(i, inobj.inode.size, bytearray(string, "utf-8"))
         if written == -1:
             print("Error: " + errorcode)
             return -1
         print("Successfully appended " + str(written) + " bytes.")
-        self.RawBlocks.Release()
         return 0
 
     # implements slice filename offset count ("slice off" contents from a file starting from offset and for count bytes)
     def slice(self, filename, offset, count):
-        self.RawBlocks.Acquire()
         try:
             offset = int(offset)
         except ValueError:
-            print("Error: " + offset + " not a valid Integer")
+            print('Error: ' + offset + ' not a valid Integer')
             return -1
         try:
             count = int(count)
         except ValueError:
-            print("Error: " + count + " not a valid Integer")
+            print('Error: ' + count + ' not a valid Integer')
             return -1
         i = self.AbsolutePathObject.PathNameToInodeNumber(filename, self.cwd)
         if i == -1:
@@ -307,12 +226,10 @@ class FSShell:
         if data == -1:
             print("Error: " + errorcode)
             return -1
-        self.RawBlocks.Release()
         return 0
 
     # implements mirror filename (mirror the contents of a file)
     def mirror(self, filename):
-        self.RawBlocks.Acquire()
         i = self.AbsolutePathObject.PathNameToInodeNumber(filename, self.cwd)
         if i == -1:
             print("Error: not found\n")
@@ -326,129 +243,158 @@ class FSShell:
         if data == -1:
             print("Error: " + errorcode)
             return -1
-        self.RawBlocks.Release()
         return 0
 
     # implements rm
     def rm(self, filename):
-        self.RawBlocks.Acquire()
         i, errorcode = self.FileOperationsObject.Unlink(self.cwd, filename)
         if i == -1:
             print("Error: " + errorcode + "\n")
             return -1
-        self.RawBlocks.Release()
         return 0
 
     # implements hard link
     def lnh(self, target, name):
-        self.RawBlocks.Acquire()
         i, errorcode = self.AbsolutePathObject.Link(target, name, self.cwd)
         if i == -1:
             print("Error: " + errorcode)
             return -1
-        self.RawBlocks.Release()
         return 0
 
     # implements soft link
     def lns(self, target, name):
-        self.RawBlocks.Acquire()
         i, errorcode = self.AbsolutePathObject.Symlink(target, name, self.cwd)
         if i == -1:
             print("Error: " + errorcode)
             return -1
-        self.RawBlocks.Release()
         return 0
+    
+    #implement server repair procedure
+    def repair(self, server_number):
+        if int(server_number)<fsconfig.NUM_SERVERS and int(server_number)>=0:
+            self.RawBlocks.repair(int(server_number))
+        else:
+            print("Enter valid server number")
 
     ## Main interpreter loop
     def Interpreter(self):
-        while True:
+        while (True):
             command = input("[cwd=" + str(self.cwd) + "]%")
             splitcmd = command.split()
             if len(splitcmd) == 0:
                 continue
             elif splitcmd[0] == "cd":
                 if len(splitcmd) != 2:
-                    print("Error: cd requires one argument")
+                    print ("Error: cd requires one argument")
                 else:
+                    self.RawBlocks.Acquire()
                     self.cd(splitcmd[1])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "cat":
                 if len(splitcmd) != 2:
-                    print("Error: cat requires one argument")
+                    print ("Error: cat requires one argument")
                 else:
+                    self.RawBlocks.Acquire()
                     self.cat(splitcmd[1])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "ls":
+                self.RawBlocks.Acquire()
                 self.ls()
+                self.RawBlocks.Release()
             elif splitcmd[0] == "showblock":
                 if len(splitcmd) != 2:
-                    print("Error: showblock requires one argument")
+                    print ("Error: showblock requires one argument")
                 else:
                     self.showblock(splitcmd[1])
             elif splitcmd[0] == "showblockslice":
                 if len(splitcmd) != 4:
-                    print("Error: showblockslice requires three arguments")
+                    print ("Error: showblockslice requires three arguments")
                 else:
-                    self.showblockslice(splitcmd[1], splitcmd[2], splitcmd[3])
+                    self.showblockslice(splitcmd[1],splitcmd[2],splitcmd[3])
             elif splitcmd[0] == "showinode":
                 if len(splitcmd) != 2:
-                    print("Error: showinode requires one argument")
+                    print ("Error: showinode requires one argument")
                 else:
                     self.showinode(splitcmd[1])
             elif splitcmd[0] == "showfsconfig":
                 if len(splitcmd) != 1:
-                    print("Error: showfsconfig do not require argument")
+                    print ("Error: showfsconfig do not require argument")
                 else:
                     self.showfsconfig()
             elif splitcmd[0] == "load":
                 if len(splitcmd) != 2:
-                    print("Error: load requires 1 argument")
+                    print ("Error: load requires 1 argument")
                 else:
                     self.load(splitcmd[1])
             elif splitcmd[0] == "save":
                 if len(splitcmd) != 2:
-                    print("Error: save requires 1 argument")
+                    print ("Error: save requires 1 argument")
                 else:
                     self.save(splitcmd[1])
             elif splitcmd[0] == "mkdir":
                 if len(splitcmd) != 2:
                     print("Error: mkdir requires one argument")
                 else:
+                    self.RawBlocks.Acquire()
                     self.mkdir(splitcmd[1])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "create":
                 if len(splitcmd) != 2:
                     print("Error: create requires one argument")
                 else:
+                    self.RawBlocks.Acquire()
                     self.create(splitcmd[1])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "append":
                 if len(splitcmd) != 3:
                     print("Error: append requires two arguments")
                 else:
+                    self.RawBlocks.Acquire()
                     self.append(splitcmd[1], splitcmd[2])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "slice":
                 if len(splitcmd) != 4:
-                    print("Error: slice requires three arguments")
+                    print ("Error: slice requires three arguments")
                 else:
-                    self.slice(splitcmd[1], splitcmd[2], splitcmd[3])
+                    self.RawBlocks.Acquire()
+                    self.slice(splitcmd[1],splitcmd[2],splitcmd[3])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "mirror":
                 if len(splitcmd) != 2:
                     print("Error: mirror requires one argument")
                 else:
+                    self.RawBlocks.Acquire()
                     self.mirror(splitcmd[1])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "rm":
                 if len(splitcmd) != 2:
                     print("Error: rm requires one argument")
                 else:
+                    self.RawBlocks.Acquire()
                     self.rm(splitcmd[1])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "lnh":
                 if len(splitcmd) != 3:
                     print("Error: lnh requires two arguments")
                 else:
+                    self.RawBlocks.Acquire()
                     self.lnh(splitcmd[1], splitcmd[2])
+                    self.RawBlocks.Release()
             elif splitcmd[0] == "lns":
                 if len(splitcmd) != 3:
                     print("Error: lns requires two arguments")
                 else:
+                    self.RawBlocks.Acquire()
                     self.lns(splitcmd[1], splitcmd[2])
+                    self.RawBlocks.Release()
+            elif splitcmd[0] == "repair":
+                if len(splitcmd)!=2:
+                    print("Error: repair command takes one argument as a valid server id/number")
+                else:
+                    self.repair(splitcmd[1])
             elif splitcmd[0] == "exit":
                 return
             else:
-                print("command " + splitcmd[0] + " not valid.\n")
+                print ("command " + splitcmd[0] + " not valid.\n")
+
+

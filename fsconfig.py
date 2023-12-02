@@ -14,7 +14,7 @@ def ConfigureFSConstants(args):
     # Basic and derived file system configuration parameters are stored in global variables
     # Call this function with args (from command-line arguments) to configure the file system
 
-    global TOTAL_NUM_BLOCKS, BLOCK_SIZE, MAX_NUM_INODES, INODE_SIZE
+    global TOTAL_NUM_BLOCKS, BLOCK_SIZE, MAX_NUM_INODES, INODE_SIZE, NUM_SERVERS, LOGCACHE
     global CID, PORT, MAX_CLIENTS, SERVER_ADDRESS, RSM_UNLOCKED, RSM_LOCKED, SOCKET_TIMEOUT, RETRY_INTERVAL
     # Default values
     # Total number of blocks in raw storage
@@ -27,7 +27,8 @@ def ConfigureFSConstants(args):
     INODE_SIZE = 16
     CID = 0
     PORT = 8000
-
+    NUM_SERVERS = 1
+    LOGCACHE = 0
     # Override defaults if provided in command line arguments (args)
     if args.total_num_blocks:
         TOTAL_NUM_BLOCKS = args.total_num_blocks
@@ -41,6 +42,12 @@ def ConfigureFSConstants(args):
         CID = args.client_id
     if args.port:
         PORT = args.port
+    if args.number_of_servers:
+       NUM_SERVERS = args.number_of_servers
+    if args.logcache==1:
+       LOGCACHE = 1
+    if args.startport!=8000:
+       PORT = args.startport
 
     # These are constants that SHOULD NEVER BE MODIFIED
     global MAX_FILENAME, INODE_NUMBER_DIRENTRY_SIZE, FREEBITMAP_BLOCK_OFFSET, INODE_BYTES_SIZE_TYPE_REFCNT, \
